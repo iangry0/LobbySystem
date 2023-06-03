@@ -48,7 +48,8 @@ public class Voting {
         Scoreboard scoreboard = scoreboardManager.getNewScoreboard();
         plugin.setScoreboard(scoreboard);
 
-        Objective objective = scoreboard.registerNewObjective("votes", "dummy", "Map Votes");
+        String scoreboarddisplayname = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("scoreboard-displayname"));
+        Objective objective = scoreboard.registerNewObjective("votes", "dummy", scoreboarddisplayname);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         for (String key : plugin.getConfig().getConfigurationSection("maps").getKeys(false)) {
