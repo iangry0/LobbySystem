@@ -1,6 +1,7 @@
 name: LobbySystem
 version: '${project.version}'
 main: me.iangry.lobbysystem.LobbySystem
+author: iAngry
 api-version: 1.19
 commands:
   vote:

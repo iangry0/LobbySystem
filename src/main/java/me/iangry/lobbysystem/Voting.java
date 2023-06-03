@@ -53,8 +53,8 @@ public class Voting {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         for (String key : plugin.getConfig().getConfigurationSection("maps").getKeys(false)) {
-            plugin.getVotes().put(key, 0);
-            objective.getScore(key).setScore(0);
+            plugin.getVotes().put(key.toLowerCase(), 0);
+            objective.getScore(key.toLowerCase()).setScore(0);
         }
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -81,7 +81,7 @@ public class Voting {
     }
 
     public boolean handleVoteCommand(Player player, String[] args) {
-        String mapName = args[0];
+        String mapName = args[0].toLowerCase();
 
         if (!plugin.getConfig().isConfigurationSection("maps." + mapName)) {
             String invalidmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("invalid-map"));
@@ -106,7 +106,6 @@ public class Voting {
 
         Bukkit.broadcastMessage(playervoted);
 
-
         return true;
     }
 
@@ -117,7 +116,7 @@ public class Voting {
             return true;
         }
 
-        String mapName = args[1];
+        String mapName = args[1].toLowerCase();
         plugin.getConfig().set("maps." + mapName, player.getLocation().serialize());
         plugin.saveConfig();
 
@@ -141,7 +140,7 @@ public class Voting {
                 if (secondsRemaining <= 10) {
                     String votingends = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("voting-ends-remaining")
                             .replace("%remaining%", String.valueOf(secondsRemaining)));
-                Bukkit.broadcastMessage(votingends);
+                    Bukkit.broadcastMessage(votingends);
                 }
 
 
@@ -166,7 +165,7 @@ public class Voting {
         plugin.setVotingOpen(false);
         plugin.getBossBar().removeAll();
 
-        String winningMap = plugin.getVotes().entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+        String winningMap = plugin.getVotes().entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey().toLowerCase();
 
         if (plugin.getVotes().get(winningMap) == 0) {
             Random rand = new Random();
@@ -176,7 +175,7 @@ public class Voting {
         String winningmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("winning-map")
                 .replace("%winningmap%", winningMap));
         Bukkit.broadcastMessage(winningmap);
-        Location warpLocation = Location.deserialize(plugin.getConfig().getConfigurationSection("maps." + winningMap).getValues(true));
+        Location warpLocation = Location.deserialize(plugin.getConfig().getConfigurationSection("maps." + winningMap.toLowerCase()).getValues(true));
         Bukkit.getOnlinePlayers().forEach(player -> player.teleport(warpLocation));
 
         // Reset the scoreboard for each player
