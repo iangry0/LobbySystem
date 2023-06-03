@@ -14,6 +14,7 @@ import org.bukkit.scoreboard.*;
 import java.util.*;
 
 public class LobbySystem extends JavaPlugin implements CommandExecutor {
+
     public static final int MINIMUM_PLAYERS = 1;
 
     private Map<String, Integer> votes = new HashMap<>();
@@ -29,7 +30,7 @@ public class LobbySystem extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         this.getCommand("vote").setExecutor(this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-        this.saveDefaultConfig();
+        saveDefaultConfig();
 
         bossBar = Bukkit.createBossBar("Voting Time Remaining", BarColor.BLUE, BarStyle.SOLID);
         scoreboardManager = Bukkit.getScoreboardManager();
@@ -39,7 +40,8 @@ public class LobbySystem extends JavaPlugin implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
+            String playeronly = ChatColor.translateAlternateColorCodes('&', getConfig().getString("player-only"));
+            sender.sendMessage(playeronly);
             return true;
         }
 
@@ -47,7 +49,9 @@ public class LobbySystem extends JavaPlugin implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("vote")) {
             if (args.length == 0) {
-                player.sendMessage("Please specify a map to vote for or use /vote addmap to add a map.");
+                String specifymap = ChatColor.translateAlternateColorCodes('&', getConfig().getString("specify-map-name"));
+
+                player.sendMessage(specifymap);
                 return true;
             }
 

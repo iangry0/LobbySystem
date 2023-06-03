@@ -26,7 +26,8 @@ public class Voting {
         String votingWorldName = plugin.getConfig().getString("votingWorld");
 
         if (votingWorldName == null || Bukkit.getWorld(votingWorldName) == null) {
-            Bukkit.broadcastMessage("The voting world specified in the config is not valid. Voting cannot start.");
+            String votingworldnotfound = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("voting-world-not-found"));
+            Bukkit.broadcastMessage(votingworldnotfound);
             return;
         }
 
@@ -34,7 +35,8 @@ public class Voting {
         long playerCountInVotingWorld = Bukkit.getOnlinePlayers().stream().filter(p -> p.getWorld().equals(votingWorld)).count();
 
         if (playerCountInVotingWorld < LobbySystem.MINIMUM_PLAYERS) {
-            Bukkit.broadcastMessage("Not enough players in the voting world to start voting.");
+            String notenough = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("not-enough-players"));
+            Bukkit.broadcastMessage(notenough);
             return;
         }
 
@@ -63,7 +65,8 @@ public class Voting {
 
         startVotingTimer();
 
-        Bukkit.broadcastMessage("Voting has started in " + votingWorldName + "! Use /vote (map) to vote.");
+        String votingstarted = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("voting-started").replace("%votingworld%", votingWorldName));
+        Bukkit.broadcastMessage(votingstarted);
     }
 
     public static void stopVoting() {
@@ -80,12 +83,14 @@ public class Voting {
         String mapName = args[0];
 
         if (!plugin.getConfig().isConfigurationSection("maps." + mapName)) {
-            player.sendMessage("Invalid map. Please vote for a valid map.");
+            String invalidmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("invalid-map"));
+            player.sendMessage(invalidmap);
             return true;
         }
 
         if (plugin.getVoters().contains(player.getUniqueId())) {
-            player.sendMessage("You have already voted.");
+            String alreadyvoted = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("already-voted"));
+            player.sendMessage(alreadyvoted);
             return true;
         }
 
@@ -93,14 +98,21 @@ public class Voting {
         plugin.getVoters().add(player.getUniqueId());
         plugin.getScoreboard().getObjective(DisplaySlot.SIDEBAR).getScore(mapName).setScore(plugin.getVotes().get(mapName));
 
-        Bukkit.broadcastMessage(player.getName() + " has voted for " + mapName + "! Current votes: " + plugin.getVotes().get(mapName));
+        String playervoted = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("player-voted-announcement")
+                .replace("%player%", player.getName())
+                .replace("%mapname%", mapName)
+                .replace("%totalvotes%", String.valueOf(plugin.getVotes().get(mapName))));
+
+        Bukkit.broadcastMessage(playervoted);
+
 
         return true;
     }
 
     public boolean handleAddMapCommand(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage("Please specify a name for the map.");
+            String specifyname = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("specify-map"));
+            player.sendMessage(specifyname);
             return true;
         }
 
@@ -108,7 +120,8 @@ public class Voting {
         plugin.getConfig().set("maps." + mapName, player.getLocation().serialize());
         plugin.saveConfig();
 
-        player.sendMessage("Map '" + mapName + "' has been added at your current location.");
+        String addmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("add-map").replace("%map%", mapName));
+        player.sendMessage(addmap);
 
         return true;
     }
@@ -120,15 +133,21 @@ public class Voting {
             @Override
             public void run() {
                 if (secondsRemaining == 30) {
-                    Bukkit.broadcastMessage("Voting ends in 30 seconds.");
+                    String votingends30 = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("voting-ends-30"));
+                    Bukkit.broadcastMessage(votingends30);
                 }
 
                 if (secondsRemaining <= 10) {
-                    Bukkit.broadcastMessage("Voting ends in " + secondsRemaining + " seconds...");
+                    String votingends = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("voting-ends-remaining")
+                            .replace("%remaining%", String.valueOf(secondsRemaining)));
+                Bukkit.broadcastMessage(votingends);
                 }
 
+
+                String bossbar = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("bossbar")
+                        .replace("%remaining%", String.valueOf(secondsRemaining)));
                 plugin.getBossBar().setProgress((double) secondsRemaining / VOTING_TIME_IN_SECONDS);
-                plugin.getBossBar().setTitle("§3§lVoting Time Remaining: §b" + secondsRemaining + "s");
+                plugin.getBossBar().setTitle(bossbar);
 
                 if (secondsRemaining == 0) {
                     finishVoting();
@@ -153,8 +172,9 @@ public class Voting {
             List<String> keys = new ArrayList<>(plugin.getVotes().keySet());
             winningMap = keys.get(rand.nextInt(keys.size()));
         }
-
-        Bukkit.broadcastMessage("Voting has ended! The winning map is " + winningMap + "!");
+        String winningmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("winning-map")
+                .replace("%winningmap%", winningMap));
+        Bukkit.broadcastMessage(winningmap);
         Location warpLocation = Location.deserialize(plugin.getConfig().getConfigurationSection("maps." + winningMap).getValues(true));
         Bukkit.getOnlinePlayers().forEach(player -> player.teleport(warpLocation));
 

@@ -1,4 +1,16 @@
-maps:
-  - floatingislands
-  - castles
+maps: ''
 votingWorld: "ctfspawn"
+voting-world-not-found: "&3The voting world cannot be found in the config. Voting cancelled."
+specify-map: "&3Please type &b/vote addmap (map) &3to add a map. It will be added at your location."
+player-only: "&3This command can only be run by a player."
+not-enough: "&3There are not enough players for voting to start."
+voting-started: "&3Voting has started in %votingworld%. Use &b/vote (map)&3 to vote."
+invalid-map: "&3You have entered an invalid map name."
+already-voted: "&3You have already voted for a map."
+player-voted-announcement: "&b%player% &3has voted for &b%mapname%&3! Current votes: &b%totalvotes%"
+specify-map-name: "&3Please specify a map name."
+add-map: "&b%map% &3has been added at your location."
+voting-ends-30: "&3Voting ends in &b30 seconds."
+voting-ends-remaining: "&3Voting ends in &b%remaining% &3seconds."
+bossbar: "&3&lVoting Time Remaining: &b%remaining%s"
+winning-map: "&3Voting has ended. &b%winningmap% &3has won!"
