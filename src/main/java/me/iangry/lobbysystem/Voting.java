@@ -4,6 +4,7 @@ import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -80,14 +81,20 @@ public class Voting {
         }
     }
 
-    public boolean handleVoteCommand(Player player, String[] args) {
-        String mapName = args[0].toLowerCase();
 
-        if (!plugin.getConfig().isConfigurationSection("maps." + mapName)) {
+    public boolean handleVoteCommand(Player player, String[] args) {
+        String mapNameInput = args[0];
+
+        Optional<String> optMapName = plugin.getConfig().getConfigurationSection("maps").getKeys(false)
+                .stream().filter(key -> key.equalsIgnoreCase(mapNameInput)).findFirst();
+
+        if (!optMapName.isPresent()) {
             String invalidmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("invalid-map"));
             player.sendMessage(invalidmap);
             return true;
         }
+
+        String mapName = optMapName.get();
 
         if (plugin.getVoters().contains(player.getUniqueId())) {
             String alreadyvoted = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("already-voted"));
@@ -95,6 +102,8 @@ public class Voting {
             return true;
         }
 
+        // Initialize vote count if necessary
+        plugin.getVotes().putIfAbsent(mapName, 0);
         plugin.getVotes().put(mapName, plugin.getVotes().get(mapName) + 1);
         plugin.getVoters().add(player.getUniqueId());
         plugin.getScoreboard().getObjective(DisplaySlot.SIDEBAR).getScore(mapName).setScore(plugin.getVotes().get(mapName));
@@ -109,6 +118,7 @@ public class Voting {
         return true;
     }
 
+
     public boolean handleAddMapCommand(Player player, String[] args) {
         if (args.length < 2) {
             String specifyname = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("specify-map"));
@@ -116,7 +126,29 @@ public class Voting {
             return true;
         }
 
-        String mapName = args[1].toLowerCase();
+        String mapName = args[1];
+
+        ConfigurationSection mapsSection = plugin.getConfig().getConfigurationSection("maps");
+        if (mapsSection == null) {
+            mapsSection = plugin.getConfig().createSection("maps");
+        }
+
+        if (mapsSection.getKeys(false).stream().anyMatch(key -> key.equalsIgnoreCase(mapName))) {
+            String mapExists = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("map-exists"));
+            player.sendMessage(mapExists);
+            return true;
+        }
+
+        // Add the new map to the voting data
+        plugin.getVotes().put(mapName.toLowerCase(), 0);
+        plugin.getVoters().clear();
+        plugin.getVoters().forEach(plugin.getVoters()::remove);
+
+        // Update the scoreboard to include the new map
+        Scoreboard scoreboard = plugin.getScoreboard();
+        Objective objective = scoreboard.getObjective(DisplaySlot.SIDEBAR);
+        objective.getScore(mapName).setScore(0);
+
         plugin.getConfig().set("maps." + mapName, player.getLocation().serialize());
         plugin.saveConfig();
 
@@ -125,6 +157,10 @@ public class Voting {
 
         return true;
     }
+
+
+
+
 
     private static void startVotingTimer() {
         votingTimer = new BukkitRunnable() {
