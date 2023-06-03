@@ -7,7 +7,7 @@ This plugin was designed to work with the War plugin however it may be adapted t
 
 **Commands:**
 * /Vote (map)
-* /Vote Addmap (map) - adds a new map spawn point at your current location
+* /Vote Addmap (map) - adds a new map spawn point at your current location (Permission: vote.addmap)
 
 In the configuration, all messages are configurable
 
@@ -23,7 +23,6 @@ Once the plugin detects the minimum amount of players in the lobby world, the vo
 **To do:**
 
    * Configurable minimum player amount to start countdown/voting
-   * Permissions
    * Remove map command
    * Reload config command
    * Allow command to be run for all players on voting map win instead of just teleporting to the area
