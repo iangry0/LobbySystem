@@ -1,16 +1,17 @@
-#Lobby System
-About:
+**Lobby System**
+
+**About:**
 A plugin which adds a waiting room/lobby for your mini game server. Once the minimum required amount of players have joined, a countdown starts and allows players to /vote for a map, which the winning map is chosen and players are warped to it.
 
 This plugin was designed to work with the War plugin however it may be adapted to your needs. (https://github.com/iangry0/war/)
 
-#Commands:
+**Commands:**
 * /Vote (map)
 * /Vote Addmap (map) - adds a new map spawn point at your current location
 
 In the configuration, all messages are configurable
 
-#How to setup plugin:
+**How to setup plugin:**
 On first install, go to your mini game portal gate or map then create run /Vote addmap (map) to create a teleportation warp at your location. This is the place players will be teleported to when the map wins the vote
 
 ![image](https://github.com/iangry0/LobbySystem/assets/77093975/519884b4-771c-4585-9823-205981ef0974)
@@ -21,7 +22,7 @@ Once the plugin detects the minimum amount of players in the lobby world, the vo
 
 
 
-#To do:
+**To do:**
 
    * Configurable minimum player amount to start countdown/voting
    * Permissions
