@@ -7,4 +7,5 @@ Once the minimum required amount of players have joined, a countdown starts and 
 * /Vote Addmap (map) - adds a new map spawn point at your current location
 
 
-![image](https://github.com/iangry0/LobbySystem/assets/77093975/1a056fc0-ccc4-4a4d-b0cd-9009c7232e10)
+![image](https://github.com/iangry0/LobbySystem/assets/77093975/daa3070b-682f-47c3-95e7-ddcb3ab700d7)
+
