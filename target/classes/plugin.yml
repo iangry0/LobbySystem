@@ -1,0 +1,8 @@
+name: LobbySystem
+version: '1.0-SNAPSHOT'
+main: me.iangry.lobbysystem.LobbySystem
+api-version: 1.19
+commands:
+  vote:
+    description: Voting command
+    usage: /<command> [args]
