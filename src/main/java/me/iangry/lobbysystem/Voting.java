@@ -23,6 +23,37 @@ public class Voting {
         this.plugin = plugin;
     }
 
+    public static String getWinningMap() {
+        int maxVotes = 0;
+        List<String> topVotedMaps = new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry : plugin.getVotes().entrySet()) {
+            if (entry.getValue() > maxVotes) {
+                maxVotes = entry.getValue();
+                topVotedMaps.clear();
+                topVotedMaps.add(entry.getKey());
+            } else if (entry.getValue() == maxVotes) {
+                topVotedMaps.add(entry.getKey());
+            }
+        }
+
+        if (maxVotes == 0) {
+            // In case no votes were cast, select a random map
+            Random rand = new Random();
+            List<String> keys = new ArrayList<>(plugin.getVotes().keySet());
+            return keys.get(rand.nextInt(keys.size()));
+        }
+
+        // In case of a tie, pick a random map from the top voted ones
+        if (topVotedMaps.size() > 1) {
+            Random rand = new Random();
+            return topVotedMaps.get(rand.nextInt(topVotedMaps.size()));
+        }
+
+        // Return the only top voted map
+        return topVotedMaps.get(0);
+    }
+
     public static void startVoting() {
         String votingWorldName = plugin.getConfig().getString("votingWorld");
 
@@ -35,12 +66,13 @@ public class Voting {
         World votingWorld = Bukkit.getWorld(votingWorldName);
         long playerCountInVotingWorld = Bukkit.getOnlinePlayers().stream().filter(p -> p.getWorld().equals(votingWorld)).count();
 
-        if (playerCountInVotingWorld < LobbySystem.MINIMUM_PLAYERS) {
+        if (playerCountInVotingWorld < plugin.getMinimumPlayers()) {
             String notenough = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("not-enough-players"));
             Bukkit.broadcastMessage(notenough);
             return;
         }
 
+        plugin.setGameState(GameState.VOTE_STARTED);
         plugin.setVotingOpen(true);
         plugin.getVotes().clear();
         plugin.getVoters().clear();
@@ -53,7 +85,14 @@ public class Voting {
         Objective objective = scoreboard.registerNewObjective("votes", "dummy", scoreboarddisplayname);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        for (String key : plugin.getConfig().getConfigurationSection("maps").getKeys(false)) {
+        ConfigurationSection mapsSection = plugin.getConfig().getConfigurationSection("maps");
+        if (mapsSection == null) {
+            String nomaps = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("no-maps-found"));
+            Bukkit.broadcastMessage(nomaps);
+            return;
+        }
+
+        for (String key : mapsSection.getKeys(false)) {
             plugin.getVotes().put(key.toLowerCase(), 0);
             objective.getScore(key.toLowerCase()).setScore(0);
         }
@@ -71,8 +110,10 @@ public class Voting {
         Bukkit.broadcastMessage(votingstarted);
     }
 
+
     public static void stopVoting() {
         plugin.setVotingOpen(false);
+        plugin.setGameState(GameState.VOTING_NOT_STARTED);
         votingTimer.cancel();
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -158,10 +199,6 @@ public class Voting {
         return true;
     }
 
-
-
-
-
     private static void startVotingTimer() {
         votingTimer = new BukkitRunnable() {
             int secondsRemaining = VOTING_TIME_IN_SECONDS;
@@ -199,20 +236,24 @@ public class Voting {
 
     private static void finishVoting() {
         plugin.setVotingOpen(false);
+        plugin.setGameState(GameState.VOTING_FINISHED);
         plugin.getBossBar().removeAll();
 
-        String winningMap = plugin.getVotes().entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey().toLowerCase();
+        String winningMap = getWinningMap();
 
-        if (plugin.getVotes().get(winningMap) == 0) {
-            Random rand = new Random();
-            List<String> keys = new ArrayList<>(plugin.getVotes().keySet());
-            winningMap = keys.get(rand.nextInt(keys.size()));
-        }
         String winningmap = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("winning-map")
                 .replace("%winningmap%", winningMap));
         Bukkit.broadcastMessage(winningmap);
-        Location warpLocation = Location.deserialize(plugin.getConfig().getConfigurationSection("maps." + winningMap.toLowerCase()).getValues(true));
-        Bukkit.getOnlinePlayers().forEach(player -> player.teleport(warpLocation));
+
+        ConfigurationSection mapSection = plugin.getConfig().getConfigurationSection("maps." + winningMap.toLowerCase());
+        if (mapSection != null) {
+            Location warpLocation = Location.deserialize(mapSection.getValues(true));
+            Bukkit.getOnlinePlayers().forEach(player -> player.teleport(warpLocation));
+        } else {
+            // Handle the case where the configuration section does not exist
+            // For example, you can send a message to the console or broadcast an error message
+            Bukkit.getLogger().warning("Configuration section for the winning map does not exist!");
+        }
 
         // Reset the scoreboard for each player
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

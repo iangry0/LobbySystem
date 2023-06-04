@@ -15,7 +15,7 @@ import java.util.*;
 
 public class LobbySystem extends JavaPlugin implements CommandExecutor {
 
-    public static final int MINIMUM_PLAYERS = 1;
+    private int minimumPlayers;
 
     private Map<String, Integer> votes = new HashMap<>();
     private Set<UUID> voters = new HashSet<>();
@@ -26,15 +26,30 @@ public class LobbySystem extends JavaPlugin implements CommandExecutor {
     private ScoreboardManager scoreboardManager;
     private Voting voting;
 
+    private GameState gameState = GameState.VOTING_NOT_STARTED;
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
+
+
     @Override
     public void onEnable() {
         this.getCommand("vote").setExecutor(this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         saveDefaultConfig();
-
+        minimumPlayers = getConfig().getInt("minimum-players", 2);
         bossBar = Bukkit.createBossBar("Voting Time Remaining", BarColor.BLUE, BarStyle.SOLID);
         scoreboardManager = Bukkit.getScoreboardManager();
         voting = new Voting(this);
+    }
+
+    public int getMinimumPlayers() {
+        return minimumPlayers;
     }
 
     @Override
