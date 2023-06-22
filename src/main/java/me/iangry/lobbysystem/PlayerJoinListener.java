@@ -3,6 +3,7 @@ package me.iangry.lobbysystem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -35,7 +36,15 @@ public class PlayerJoinListener implements Listener {
             event.getPlayer().teleport(warpLocation);
         } else {
             // Teleport to spawn as voting has started or not yet started
-            event.getPlayer().teleport(votingWorld.getSpawnLocation());
+           Player player = event.getPlayer();
+            String spawncommand = plugin.getConfig().getString("spawn-command").replace("%player%", player.getName());
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), spawncommand);
+
+            if (gameState == GameState.VOTE_STARTED) {
+                // If voting is ongoing, set the scoreboard and add to the BossBar
+                event.getPlayer().setScoreboard(plugin.getScoreboard());
+                plugin.getBossBar().addPlayer(event.getPlayer());
+            }
         }
 
         long playersInVotingWorldCount = Bukkit.getOnlinePlayers().stream().filter(p -> p.getWorld().equals(votingWorld)).count();
@@ -44,6 +53,7 @@ public class PlayerJoinListener implements Listener {
             Voting.startVoting();
         }
     }
+
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {

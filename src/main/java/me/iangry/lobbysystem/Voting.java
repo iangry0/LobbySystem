@@ -14,6 +14,15 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.*;
 
+
+
+//
+
+//ISSUE: ONLY WORKS WITH 1 PLAYER FOR SOME REASON, IF 2 JOIN THEN ONLY ONE SEES VOTING
+
+
+//
+
 public class Voting {
     private static final int VOTING_TIME_IN_SECONDS = 120;
     private static LobbySystem plugin;

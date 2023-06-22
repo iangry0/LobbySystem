@@ -17,3 +17,4 @@ winning-map: "&3Voting has ended. &b%winningmap% &3has won!"
 scoreboard-displayname: "&3Map Votes"
 no-maps-found: "&3No maps were found in your configuration. Please use &b/vote addmap (map)"
 minimum-players: 2
+spawn-command: "spawn %player%"
